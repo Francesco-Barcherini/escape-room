@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
         }
         else
         {
-            printf("Connessione al server sulla porta: %hu\n", porta);
+            printf("Connessione al server sulla porta: %hu\n\n", porta);
             break;
         }
     }

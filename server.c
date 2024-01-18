@@ -233,14 +233,14 @@ int main(int argc, char *argv[]){
                             if (esito != incorso)
                                 continue;
                             cmd_objs(i, stanze[socketToAccount[i]->room]);
-                            fine_comando(i, room, socketToAccount[i], accounts, stanze);
+                            fine_comando(i, socketToAccount[i]->room, socketToAccount[i], accounts, stanze);
                         }
                         else if (!strcmp(comando, "notes")) { // note
                             esito = invia_stato(i, socketToAccount[i], accounts, stanze);
                             if (esito != incorso)
                                 continue;
                             cmd_notes(i, &stanze[socketToAccount[i]->room]);
-                            fine_comando(i, room, socketToAccount[i], accounts, stanze);
+                            fine_comando(i, socketToAccount[i]->room, socketToAccount[i], accounts, stanze);
                         }
                         else if (!strcmp(comando, "end")) { // end
                             logout_account(socketToAccount[i], stanze);

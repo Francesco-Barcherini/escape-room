@@ -94,7 +94,7 @@ void descrizione_stanza(uint8_t room){
 
 /* Funzione che mostra a video la lista delle stanze*/
 void mostra_stanze(){
-    printf("****************************** STANZE ******************************\n\n");
+    printf("****************************** STANZE ******************************\n");
     printf("Seleziona una stanza:\n\n");
     printf("1)  La prigione dei pirati\n");
     printf("2)  Sherlock\n\n");
