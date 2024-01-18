@@ -2,5 +2,6 @@ Guida_make.pdf
 Istruzioni_consegna.pdf
 *.o
 client
+other
 server
 *.txt
