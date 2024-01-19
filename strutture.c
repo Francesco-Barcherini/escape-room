@@ -124,7 +124,7 @@ void init_partita(struct Partita *partita, int room) {
                     "Sembrano appartenere al vecchio prigioniero, iniziano così:\n"
                     "1603 - Caro JOHN, ...\n"
                     "1598 - SAM, amico mio...\n"
-                    "1605 - Mia amata SCARLETT\n"
+                    "1605 - Mia amata SCARLETT...\n"
                     "1597 - Ciao FLINT, vecchio lupo di mare...\n"
                 );
 
@@ -137,10 +137,10 @@ void init_partita(struct Partita *partita, int room) {
                     "Il forziere è chiuso\n"
                 );
                 partita->oggetti[1].bloccato = true;
-                partita->oggetti[1].seconds = 30;
+                partita->oggetti[1].seconds = 60;
                 partita->oggetti[1].tipo = aperta;
                 strcpy(partita->oggetti[1].enigma.domanda, "Il forziere è chiuso da un lucchetto a combinazione, inserisci 4 cifre: ");
-                strcpy(partita->oggetti[1].enigma.risposta, "5348");
+                strcpy(partita->oggetti[1].enigma.risposta, "5348"); // Lunghezza dei 4 nomi, ordinati per date: FLINT-SAM-JOHN-SCARLETT -> 5348
 
                 //oggetto 2 -> spada
                 strcpy(partita->oggetti[2].nome, "Spada");
@@ -173,7 +173,7 @@ void init_partita(struct Partita *partita, int room) {
                 strcpy(partita->oggetti[4].descBloccato, 
                     "La mappa potrebbe contenere le indicazioni per un grande tesoro, ma è stretta tra le mani dello ++Scheletro++\n"
                 );
-                partita->oggetti[4].bloccato = true;
+                partita->oggetti[4].bloccato = true; // Si sblocca con use Scellino -> lo Scheletro vuole essere pagato
                 partita->oggetti[4].token = true;
                 partita->oggetti[4].tipo = use;
 
@@ -185,7 +185,7 @@ void init_partita(struct Partita *partita, int room) {
                 strcpy(partita->oggetti[5].descBloccato, 
                     "Ci sono due serrature, per la prima serve una **Chiave**, la seconda invece è una fessura alta e stretta\n"
                 );
-                partita->oggetti[5].bloccato = true;
+                partita->oggetti[5].bloccato = true; // Si sblocca con use Chiave Spada
                 partita->oggetti[5].token = true;
                 partita->oggetti[5].tipo = use;
 
@@ -209,8 +209,8 @@ void init_partita(struct Partita *partita, int room) {
                 strcpy(partita->locazioni[2].desc, 
                     "Le sbarre sono arrugginite ma per uscire serve aprire le due **Serrature**. Il carceriere ha dimenticato la **Spada** appoggiata alle sbarre.\n"
                 );
-            // la fine è tra 3 minuti
-            partita->fine = time(NULL) + 180;
+            // la fine è tra 10 minuti
+            partita->fine = time(NULL) + 600;
             break;
         case 1:
             partita->totToken = 2;
@@ -219,7 +219,7 @@ void init_partita(struct Partita *partita, int room) {
                 // oggetto 0 -> lettera
                 strcpy(partita->oggetti[0].nome, "Lettera");
                 strcpy(partita->oggetti[0].desc, 
-                    "La donna ha scritto una lettera d'addio, strano per una vittima di omicidio\n"
+                    "La donna ha scritto una lettera d'addio con l'inchiostro UV, strano per una vittima di suicidio\n"
                     "\"Caro fratello,\n"
                     "Addolorata\n"
                     "Rinuncio alla vita.\n"
@@ -229,23 +229,23 @@ void init_partita(struct Partita *partita, int room) {
                 strcpy(partita->oggetti[0].descBloccato, 
                     "La lettera è totalmente bianca, eppure deve esserci scritto qualcosa\n"
                 );
-                partita->oggetti[0].bloccato = true;
+                partita->oggetti[0].bloccato = true; // Si sblocca con use Lampada -> la lettera è scritta con inchiostro invisibile
                 partita->oggetti[0].token = true;
                 partita->oggetti[0].tipo = use;
 
                 // oggetto 1 -> lampada
                 strcpy(partita->oggetti[1].nome, "Lampada");
                 strcpy(partita->oggetti[1].desc, 
-                    "La lampada è una generica abat-jour da ++Comodino++ ma emette raggi di luce ultra-violetti\n"
+                    "La lampada è una generica abat-jour da ++Comodino++ ma emette raggi di luce ultra-violetta\n"
                 );
 
                 //oggetto 2 -> macchina da scrivere
                 strcpy(partita->oggetti[2].nome, "Underwood");
                 strcpy(partita->oggetti[2].desc, 
-                    "Il rapporto è pronto, manca l'arma del delitto\n"
+                    "Il rapporto è pronto, manca la prova schiacciante\n"
                 );
                 strcpy(partita->oggetti[2].descBloccato, 
-                    "È una vecchia macchina da scrivere, ti servirà per redigere il rapporto. Attenzione: non puoi sbagliare l'idenità del colpevole!!\n"
+                    "È una vecchia macchina da scrivere, ti servirà per redigere il rapporto. Attenzione: non puoi sbagliare l'idenità del colpevole!! Non prenderla prima di essere sicuro\n"
                 );
                 partita->oggetti[2].bloccato = true;
                 partita->oggetti[2].token = true;
@@ -258,10 +258,10 @@ void init_partita(struct Partita *partita, int room) {
                     "4) Ginevra, la sorella\n"
                     "Chi è l'assassino? Inserisci il numero: \n"
                 );
-                strcpy(partita->oggetti[2].enigma.risposta, "2");
+                strcpy(partita->oggetti[2].enigma.risposta, "2"); // Nella lettera d'addio, le prime lettere di ogni riga formano la parola "CARLA"
 
                 // oggetto 3 -> coltello
-                strcpy(partita->oggetti[3].nome, "Coltello");
+                strcpy(partita->oggetti[3].nome, "Coltello"); // distrattore, non serve per vincere
                 strcpy(partita->oggetti[3].desc, 
                     "Il coltello è un'affilata lama messicana. È ancora sporco di sangue, è l'arma del delitto.\n"
                 );
@@ -285,8 +285,8 @@ void init_partita(struct Partita *partita, int room) {
                 strcpy(partita->locazioni[2].desc, 
                     "Il pavimento è sporco di sangue, sotto il letto c'è un **Coltello**\n"
                 );
-            // la fine è tra 2 minuti
-            partita->fine = time(NULL) + 120;
+            // la fine è tra 5 minuti
+            partita->fine = time(NULL) + 300;
             break;
         default:
             // espandere per le altre stanze
