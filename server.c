@@ -114,7 +114,7 @@ int main(int argc, char *argv[]){
                             for(j = 0; j < NSTANZE; j++){
                                 // una partita è attiva se c'è almeno un giocatore connesso
                                 if(stanze[j].connessi > 0){
-                                    printf("C'è una partita in corso nella room %d, impossibile chiudere il server\n", j+1);
+                                    printf("C'è una partita in corso nella room %d, impossibile chiudere il server\n\n", j+1);
                                     break;
                                 }
                             }

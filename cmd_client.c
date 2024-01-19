@@ -197,11 +197,15 @@ void signup(int sd) {
 
     // lettura username
     printf("Inserisci username: ");
-    scanf("%19s", username);
+    fgets(username, sizeof(username), stdin);
+    // rimuovo \n
+    username[strlen(username) - 1] = '\0';
 
     // lettura password
     printf("Inserisci password: ");
-    scanf("%19s", password);
+    fgets(password, sizeof(password), stdin);
+    // rimuovo \n
+    password[strlen(password) - 1] = '\0';
 
     // invio comando
     ret = send(sd, comando, sizeof(comando), 0);
@@ -247,11 +251,15 @@ bool login(int sd) {
 
     // lettura username
     printf("Inserisci username: ");
-    scanf("%19s", username);
+    fgets(username, sizeof(username), stdin);
+    // rimuovo \n
+    username[strlen(username) - 1] = '\0';
 
     // lettura password
     printf("Inserisci password: ");
-    scanf("%19s", password);
+    fgets(password, sizeof(password), stdin);
+    // rimuovo \n
+    password[strlen(password) - 1] = '\0';
 
     // invio comando
     ret = send(sd, comando, sizeof(comando), 0);
@@ -278,7 +286,7 @@ bool login(int sd) {
     }
 
     if (esito == 0) {
-        printf("Bentornato nell'escape room!\nSvela i misteri, risolvi gli enigmi e fuggi dalla stanza prima che sia troppo tardi!\n\n");
+        printf("\nBenvenuto nell'Escape Room!\nSvela i misteri, risolvi gli enigmi e fuggi dalla stanza prima che sia troppo tardi!\n\n");
         return true;
     }
 
@@ -303,7 +311,8 @@ void accesso(int sd) {
         mostra_accesso();
 
         // lettura comando
-        scanf("%6s", comando);
+        fgets(comando, sizeof(comando), stdin);
+        comando[strlen(comando) - 1] = '\0'; // rimuovo \n
 
         if (!strcmp(comando, "signup")) // signup
             signup(sd);

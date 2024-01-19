@@ -7,14 +7,14 @@ struct Account* cerca_account(struct Account *accounts, char *username) {
     // Cerca l'account nella lista
     while (corrente != NULL) {
         if (!strcmp(corrente->username, username)) {
-            printf("Account %s trovato nella lista.\n", username);
+            printf("Account %s trovato nella lista degli account\n", username);
             return corrente;
         }
         corrente = corrente->next;
     }
 
     // Account non trovato nella lista
-    printf("Account %s non trovato nella lista.\n", username);
+    printf("Account %s non trovato nella lista degli account\n", username);
     return NULL;
 }
 
@@ -31,12 +31,12 @@ struct Account* verifica_account(struct Account *accounts, char *username, char 
 
     // Se l'account esiste ma la password non è corretta
     if (strcmp(account->password, password)) {
-        printf("Password errata\n");
+        printf("Password errata per l'account %s\n", username);
         return NULL;
     }
 
     // Se l'account esiste e la password è corretta
-    printf("Password corretta\n");
+    printf("Password corretta per l'account %s\n", username);
     return account;
 }
 
@@ -76,7 +76,7 @@ bool aggiungi_account(struct Account **accounts, char *username, char *password)
         *accounts = new_account;
     }
 
-    printf("Creazione account %s riuscita\n", username);
+    printf("Creazione account %s riuscita\n\n", username);
     return true;
 }
 
@@ -98,7 +98,7 @@ void logout_account(struct Account *account, struct Partita *rooms) {
 
         // se la stanza è vuota, la prossima volta la start creerà una nuova partita
         if (rooms[room].connessi == 0)
-            printf("La stanza %d è vuota\n", room + 1);
+            printf("La stanza %d è vuota\n\n", room + 1);
     }
 }
 
@@ -147,6 +147,9 @@ void init_partita(struct Partita *partita, int room) {
                 strcpy(partita->oggetti[2].desc, 
                     "Il capitano Barbanera ha dimenticato la sua spada\n"
                 );
+                strcpy(partita->oggetti[2].descBloccato, 
+                    "Il capitano Barbanera ha dimenticato la sua spada\n"
+                );
                 partita->oggetti[2].bloccato = true;
                 partita->oggetti[2].token = true;
                 partita->oggetti[2].tipo = aperta;
@@ -192,19 +195,19 @@ void init_partita(struct Partita *partita, int room) {
                 //locazione 0 -> tavolino
                 strcpy(partita->locazioni[0].nome, "Tavolino");
                 strcpy(partita->locazioni[0].desc, 
-                    "Il tavolino è consumato dalla salsedine. Sopra sono appoggiate delle vecchie **Lettere** e uno **Scellino**. Nel cassettino c'è un forziere chiuso in cui si riesce a intravedere una **Chiave**\n"
+                    "Il tavolino è consumato dalla salsedine. Sopra sono appoggiate delle vecchie **Lettere** e uno **Scellino**. Nel cassettino c'è un forziere chiuso in cui si riesce a intravedere una **Chiave**.\n"
                 );
 
                 // locazione 1 -> scheletro
                 strcpy(partita->locazioni[1].nome, "Scheletro");
                 strcpy(partita->locazioni[1].desc, 
-                    "Lo scheletro è del vecchio prigioniero, meglio fuggire presto dalla cella. Ha ancora stretta tra le mani una **Mappa**, ma da buon pirata non la lascerà andare senza un giusto compenso\n"
+                    "Lo scheletro è del vecchio prigioniero, meglio fuggire presto dalla cella. Ha ancora stretta tra le mani una **Mappa**, ma da buon pirata non la lascerà andare senza un giusto compenso.\n"
                 );
 
                 // locazione 2 -> sbarre
                 strcpy(partita->locazioni[2].nome, "Sbarre");
                 strcpy(partita->locazioni[2].desc, 
-                    "Le sbarre sono arrugginite ma per uscire serve aprire le due **Serrature**. Il carceriere ha dimenticato la **Spada** appoggiata alle sbarre\n"
+                    "Le sbarre sono arrugginite ma per uscire serve aprire le due **Serrature**. Il carceriere ha dimenticato la **Spada** appoggiata alle sbarre.\n"
                 );
             // la fine è tra 3 minuti
             partita->fine = time(NULL) + 180;
@@ -260,7 +263,7 @@ void init_partita(struct Partita *partita, int room) {
                 // oggetto 3 -> coltello
                 strcpy(partita->oggetti[3].nome, "Coltello");
                 strcpy(partita->oggetti[3].desc, 
-                    "Il coltello è un'affilata lama messicana. È ancora sporco di sangue, è l'arma del delitto\n"
+                    "Il coltello è un'affilata lama messicana. È ancora sporco di sangue, è l'arma del delitto.\n"
                 );
             partita->maxPresi = 2;
             partita->nLocazioni = 3;
@@ -268,13 +271,13 @@ void init_partita(struct Partita *partita, int room) {
                 //locazione 0 -> letto
                 strcpy(partita->locazioni[0].nome, "Letto");
                 strcpy(partita->locazioni[0].desc, 
-                    "Sul letto c'è ancora il cadavere della vittima. Accanto alla donna si vede una **Lettera**\n"
+                    "Sul letto c'è ancora il cadavere della vittima. Accanto alla donna si vede una **Lettera**.\n"
                 );
 
                 // locazione 1 -> comodino
                 strcpy(partita->locazioni[1].nome, "Comodino");
                 strcpy(partita->locazioni[1].desc, 
-                    "Il comodino è in disordine, sopra c'è una **Lampada** e hai appoggiato la tua macchina da scrivere, una vecchia **Underwood**, per redigere il rapporto\n"
+                    "Il comodino è in disordine, sopra c'è una **Lampada** e hai appoggiato la tua macchina da scrivere, una vecchia **Underwood**, per redigere il rapporto.\n"
                 );
 
                 // locazione 2 -> pavimento
@@ -308,7 +311,7 @@ void update_esito(struct Account *accounts, struct Partita *partita, enum EsitoP
     // reset partita, la prossima volta la start creerà una nuova partita
     partita->connessi = 0;
 
-    printf("Partita conclusa nella stanza %d\n", partita->room + 1);
+    printf("Partita conclusa nella stanza %d\n\n", partita->room + 1);
 }
 
 /* Gestisce l'invio dello stato della partita prima di gestire il comando*/
@@ -319,6 +322,8 @@ enum EsitoPartita invia_stato(int sd, struct Account *account, struct Account *a
 
     esito = account->esito;
     room = account->room;
+
+    printf("Check stato della partita %d\n", room + 1);
 
     if (esito == incorso) {//check timer prima di eseguire il comando
         partita = &stanze[room];
@@ -345,6 +350,8 @@ void fine_comando(int sd, int room, struct Account *account, struct Account *acc
     struct Partita *partita;
     char buffer[WORDLEN];
     int ret;
+
+    printf("Check fine comando nella stanza %d\n\n", room + 1);
 
     partita = &stanze[room];
 
@@ -376,6 +383,8 @@ uint8_t gestisci_enigma(int sd, struct Partita *partita, int obj, struct Account
     char answer[WORDLEN];
     int ret, len;
     uint8_t esito = 0;
+
+    printf("\nGestione enigma\n");
 
     oggetto = &partita->oggetti[obj];
 
@@ -419,7 +428,7 @@ uint8_t gestisci_enigma(int sd, struct Partita *partita, int obj, struct Account
     if (oggetto->tipo == aperta) {
         // se risposta corretta
         if (!strcmp(answer, oggetto->enigma.risposta)) {
-            printf("Risposta corretta\n");
+            printf("Risposta all'enigma corretta\n");
             esito = 1;
             // aggiorno oggetto e partita
             oggetto->bloccato = false;
@@ -428,7 +437,7 @@ uint8_t gestisci_enigma(int sd, struct Partita *partita, int obj, struct Account
 
         }
         else { // se risposta sbagliata
-            printf("Risposta sbagliata\n");
+            printf("Risposta all'enigma sbagliata\n");
             esito = 0;
         }
 
@@ -462,7 +471,7 @@ uint8_t gestisci_enigma(int sd, struct Partita *partita, int obj, struct Account
     if (oggetto->tipo == multipla) {
         // se risposta corretta
         if (!strcmp(answer, oggetto->enigma.risposta)) {
-            printf("Risposta corretta\n");
+            printf("Risposta all'enigma corretta\n");
             esito = 1;
             // aggiorno oggetto e partita
             oggetto->bloccato = false;

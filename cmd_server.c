@@ -114,6 +114,7 @@ struct Account* cmd_login(int sd, struct Account *accounts) {
     account = verifica_account(accounts, username, password);
     if (!account) {
         // Invio esito negativo
+        printf("Login di %s fallito\n\n", username);
         esito = 2;
         ret = send(sd, &esito, sizeof(esito), 0);
         if (ret == -1) {
@@ -126,6 +127,7 @@ struct Account* cmd_login(int sd, struct Account *accounts) {
     // Se l'account è già loggato
     if (account->logged) {
         // Invio esito negativo
+        printf("Login di %s fallito: già loggato\n\n", username);
         esito = 3;
         ret = send(sd, &esito, sizeof(esito), 0);
         if (ret == -1) {
@@ -138,6 +140,7 @@ struct Account* cmd_login(int sd, struct Account *accounts) {
     // aggiorno account
     account->logged = true;
 
+    printf("Login di %s effettuato\n\n", username);
     // Invio esito positivo
     ret = send(sd, &esito, sizeof(esito), 0);
     if (ret == -1) {
@@ -195,7 +198,7 @@ bool cmd_start(int sd, struct Account *account, struct Partita *stanze) {
         exit(1);
     }
 
-    printf("Utente %s connesso alla stanza %d\n", account->username, room + 1);
+    printf("Utente %s connesso alla stanza %d\n\n", account->username, room + 1);
     return true;    
 }
 
@@ -224,7 +227,7 @@ void cmd_look(int sd, struct Partita partita) {
             if (ret == -1) 
                 perror("look -> Errore nell'invio della descrizione");
             else 
-                printf("Inviata descrizione oggetto %s\n", nome);
+                printf("look: inviata descrizione oggetto %s\n", nome);
             return;
         }
     }
@@ -237,7 +240,7 @@ void cmd_look(int sd, struct Partita partita) {
             if (ret == -1) 
                 perror("look -> Errore nell'invio della descrizione");
             else
-                printf("Inviata descrizione locazione %s\n", nome);
+                printf("look: inviata descrizione locazione %s\n", nome);
             return;
         }
     }
@@ -248,7 +251,7 @@ void cmd_look(int sd, struct Partita partita) {
     if (ret == -1) 
         perror("look -> Errore nell'invio della descrizione");
     else
-        printf("Descrizione di %s non trovata\n", nome);
+        printf("look: descrizione di %s non trovata\n", nome);
 }
 
 /* Funzione che gestisce il comando take
@@ -300,7 +303,7 @@ bool cmd_take(int sd, struct Partita *partita, struct Account *accounts) {
             perror("take -> Errore nell'invio dell'esito");
             exit(1);
         }
-        printf("Oggetto %s non trovato\n", nome);
+        printf("take: oggetto %s non trovato\n", nome);
         return false;
     }
 
@@ -315,7 +318,7 @@ bool cmd_take(int sd, struct Partita *partita, struct Account *accounts) {
             perror("take -> Errore nell'invio dell'esito");
             exit(1);
         }
-        printf("Oggetto %s lasciato\n", nome);
+        printf("take: oggetto %s lasciato\n", nome);
         return false;
     }
 
@@ -329,7 +332,7 @@ bool cmd_take(int sd, struct Partita *partita, struct Account *accounts) {
                 perror("take -> Errore nell'invio dell'esito");
                 exit(1);
             }
-            printf("Oggetto %s bloccato da una use\n", nome);
+            printf("take: oggetto %s bloccato da una use\n", nome);
             return false;
         }
 
@@ -341,7 +344,7 @@ bool cmd_take(int sd, struct Partita *partita, struct Account *accounts) {
             perror("take -> Errore nell'invio dell'esito");
             exit(1);
         }
-        printf("Oggetto %s bloccato da un enigma\n", nome);
+        printf("take: oggetto %s bloccato da un enigma\n", nome);
         return (gestisci_enigma(sd, partita, i, accounts) == 2 ? true : false); // se il client si è disconnesso ritorno true
     }
 
@@ -354,7 +357,7 @@ bool cmd_take(int sd, struct Partita *partita, struct Account *accounts) {
             perror("take -> Errore nell'invio dell'esito");
             exit(1);
         }
-        printf("Inventario pieno\n");
+        printf("take: inventario pieno\n");
         return false;
     }
 
@@ -368,7 +371,7 @@ bool cmd_take(int sd, struct Partita *partita, struct Account *accounts) {
         perror("take -> Errore nell'invio dell'esito");
         exit(1);
     }
-    printf("Oggetto %s preso\n", nome);
+    printf("take: oggetto %s preso\n", nome);
     return false;
 }
 
@@ -428,7 +431,7 @@ bool cmd_use(int sd, struct Partita *partita, struct Account *accounts) {
             perror("use -> Errore nell'invio dell'esito");
             exit(1);
         }
-        printf("Oggetto %s non trovato\n", obj1);
+        printf("use: oggetto %s non trovato\n", obj1);
         return false;
     }
 
@@ -441,7 +444,7 @@ bool cmd_use(int sd, struct Partita *partita, struct Account *accounts) {
             perror("use -> Errore nell'invio dell'esito");
             exit(1);
         }
-        printf("Oggetto %s non preso\n", obj1);
+        printf("use: oggetto %s non preso nell'inventario\n", obj1);
         return false;
     }
 
@@ -475,7 +478,7 @@ bool cmd_use(int sd, struct Partita *partita, struct Account *accounts) {
                 perror("use -> Errore nell'invio dell'esito");
                 exit(1);
             }
-            printf("Oggetto %s non trovato\n", obj2);
+            printf("use: oggetto %s non trovato\n", obj2);
             return false;
         }
 
@@ -490,7 +493,7 @@ bool cmd_use(int sd, struct Partita *partita, struct Account *accounts) {
                     perror("use -> Errore nell'invio dell'esito");
                     exit(1);
                 }
-                printf("Oggetto %s bloccato da una use\n", obj2);
+                printf("use: oggetto %s bloccato da una use\n", obj2);
                 return false;
             }
 
@@ -502,7 +505,7 @@ bool cmd_use(int sd, struct Partita *partita, struct Account *accounts) {
                 perror("use -> Errore nell'invio dell'esito");
                 exit(1);
             }
-            printf("Oggetto %s bloccato da un enigma\n", obj2);
+            printf("use: oggetto %s bloccato da un enigma\n", obj2);
             esito = gestisci_enigma(sd, partita, name2obj(partita, obj2), accounts);
             if (esito == 2) // client disconnesso
                 return true;
@@ -539,9 +542,9 @@ bool cmd_use(int sd, struct Partita *partita, struct Account *accounts) {
             exit(1);
         }
         if (quanti == 1)
-            printf("Oggetto %s già usato o inutile\n", obj1);
+            printf("use: oggetto %s già usato o inutile\n", obj1);
         else
-            printf("Oggetti %s e %s già usati o inutili\n", obj1, obj2);
+            printf("use: oggetti %s e %s già usati o inutili\n", obj1, obj2);
         return false;
     }
 
@@ -572,9 +575,9 @@ bool cmd_use(int sd, struct Partita *partita, struct Account *accounts) {
         exit(1);
     }
     if (quanti == 1)
-        printf("Use %s: oggetto %s sbloccato\n", obj1, target->nome);
+        printf("use %s: oggetto %s sbloccato\n", obj1, target->nome);
     else
-        printf("Use %s %s: oggetto %s sbloccato\n", obj1, obj2, target->nome);
+        printf("use %s %s: oggetto %s sbloccato\n", obj1, obj2, target->nome);
     return false;
 }
 
@@ -598,7 +601,7 @@ void cmd_objs(int sd, struct Partita partita) {
     if (ret == -1) 
         perror("objs -> Errore nell'invio della lista");
     else
-        printf("Inviata lista oggetti\n");
+        printf("objs: inviata lista oggetti\n");
 
     return;
 }
@@ -637,8 +640,6 @@ void cmd_notes(int sd, struct Partita *partita) {
             strcat(buffer, "\n");
         }
 
-        printf("Note:\n%s", buffer);
-
         // invio la lunghezza della lista (senza \0)
         len = strlen(buffer);
         len = htons(len); // converto in network byte order
@@ -656,8 +657,9 @@ void cmd_notes(int sd, struct Partita *partita) {
                 perror("notes -> Errore nell'invio della lista");
                 return;
             }
-            printf("Inviata lista note\n");
         }
+        
+        printf("notes: inviata lista note\n");
         return;
     }
 
@@ -676,5 +678,5 @@ void cmd_notes(int sd, struct Partita *partita) {
     if (partita->ultimanota == partita->primanota)
         partita->primanota = (partita->primanota + 1) % (MAXNOTE + 1);
     
-    printf("Aggiunta nota\n");
+    printf("notes add: aggiunta nota\n");
 }
