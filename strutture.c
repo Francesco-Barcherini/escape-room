@@ -52,12 +52,15 @@ bool aggiungi_account(struct Account **accounts, char *username, char *password)
     }
 
     // Creazione nuovo account
+    // Il server viene chiuso con CTRL+C prima di aver deallocato la memoria con la free
+    // Ci fidiamo del sistema operativo che deallocherà la memoria
     new_account = malloc(sizeof(struct Account));
     if (new_account == NULL) {
         perror("Errore nell'allocazione della memoria per il nuovo account");
         exit(1);
     }
 
+    // inizializzo l'account
     strcpy(new_account->username, username);
     strcpy(new_account->password, password);
     new_account->logged = false;
@@ -93,7 +96,7 @@ void logout_account(struct Account *account, struct Partita *rooms) {
         // aggiorno la stanza
         rooms[room].connessi--;
 
-        // se la stanza è vuota
+        // se la stanza è vuota, la prossima volta la start creerà una nuova partita
         if (rooms[room].connessi == 0)
             printf("La stanza %d è vuota\n", room + 1);
     }
@@ -109,7 +112,7 @@ void init_partita(struct Partita *partita, int room) {
     partita->room = room;
     partita->connessi = 1;
 
-    switch (room)
+    switch (room) // inizializzo le strutture dati in base alla stanza
     {
         case 0:
             partita->totToken = 3;
@@ -289,11 +292,11 @@ void init_partita(struct Partita *partita, int room) {
     printf("Partita avviata nella stanza %d\n", room + 1);
 }
 
-/* In caso di terminazione della partita, informa tutti gli altri account*/
+/* In caso di terminazione della partita, informa tutti gli altri account che stavano giocando nella stessa stanza*/
 void update_esito(struct Account *accounts, struct Partita *partita, enum EsitoPartita esito) {
     struct Account *corrente = accounts;
 
-    // Cerca l'account nella lista
+    // Cerca nella lista tutti gli account che stavano giocando nella stessa stanza
     while (corrente != NULL) {
         if (corrente->room == partita->room) {
             corrente->esito = esito;
@@ -302,6 +305,7 @@ void update_esito(struct Account *accounts, struct Partita *partita, enum EsitoP
         corrente = corrente->next;
     }
 
+    // reset partita, la prossima volta la start creerà una nuova partita
     partita->connessi = 0;
 
     printf("Partita conclusa nella stanza %d\n", partita->room + 1);
@@ -310,16 +314,17 @@ void update_esito(struct Account *accounts, struct Partita *partita, enum EsitoP
 /* Gestisce l'invio dello stato della partita prima di gestire il comando*/
 enum EsitoPartita invia_stato(int sd, struct Account *account, struct Account *accounts, struct Partita *stanze) {
     struct Partita *partita;
-    uint8_t esito = account->esito;
+    uint8_t esito;
     int room, ret;
 
+    esito = account->esito;
     room = account->room;
 
     if (esito == incorso) {//check timer prima di eseguire il comando
         partita = &stanze[room];
         if (time(NULL) >= partita->fine) { // tempo scaduto
             printf("Tempo scaduto nella stanza %d\n", room + 1);
-            update_esito(accounts, partita, timer);
+            update_esito(accounts, partita, timer); // aggiorno gli altri account che stavano giocando nella stessa stanza
         }
     }
 
@@ -355,7 +360,7 @@ void fine_comando(int sd, int room, struct Account *account, struct Account *acc
     if (!account) // se il client ha chiuso la connessione
         return;
 
-    // Invio informazioni 
+    // Invio informazioni in formato text
     sprintf(buffer, "%d %d %d %ld", account->esito, partita->token, partita->totToken - partita->token, partita->fine - time(NULL));
     ret = send(sd, buffer, sizeof(buffer), 0);
     if (ret == -1) {
@@ -364,7 +369,7 @@ void fine_comando(int sd, int room, struct Account *account, struct Account *acc
     }
 }
 
-/* Gestisce l'interazione client-server per l'enigma restituisce 0 se sbagliato, 1 se giusto, 2 se client disconnesso*/
+/* Gestisce l'interazione client-server per l'enigma, restituisce 0 se sbagliato, 1 se giusto, 2 se client disconnesso*/
 uint8_t gestisci_enigma(int sd, struct Partita *partita, int obj, struct Account *accounts) {
     struct Oggetto *oggetto;
     char buffer[BUFLEN];

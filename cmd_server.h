@@ -9,7 +9,7 @@
     void cmd_look(int sd, struct Partita partita);
     bool cmd_take(int sd, struct Partita *partita, struct Account *accounts);
     bool cmd_use(int sd, struct Partita *partita, struct Account *accounts);
-    void cmd_notes(int sd, struct Partita *partita);
+    void cmd_notes(int sd, struct Partita *partita); // funzionalità a piacere
     void cmd_objs(int sd, struct Partita partita);
 
 #endif

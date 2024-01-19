@@ -206,6 +206,8 @@ void cmd_look(int sd, struct Partita partita) {
     int i, ret;
 
     // look è gestita lato client
+
+    // look [location | object]
     // recupero l'argomento
     ret = recv(sd, nome, sizeof(nome), 0);
     if (ret == -1) {
@@ -340,7 +342,7 @@ bool cmd_take(int sd, struct Partita *partita, struct Account *accounts) {
             exit(1);
         }
         printf("Oggetto %s bloccato da un enigma\n", nome);
-        return (gestisci_enigma(sd, partita, i, accounts) == 2 ? true : false);
+        return (gestisci_enigma(sd, partita, i, accounts) == 2 ? true : false); // se il client si è disconnesso ritorno true
     }
 
     // se l'inventario è pieno
@@ -601,10 +603,16 @@ void cmd_objs(int sd, struct Partita partita) {
     return;
 }
 
+/* 
+Funzionalità a piacere: i giocatori in una stanza condividono un blocco note in cui possono annotarsi delle osservazioni visibili dagli altri giocatori
+Nel blocco note ci sono massimo MAXNOTES note, gestite come una coda FIFO
+notes -> stampa le note presenti nel blocco note
+notes add -> aggiunge una nota al blocco note
+*/
 /* Funzione che gestisce il comando notes*/
 void cmd_notes(int sd, struct Partita *partita) {
     // notes -> visualizza le note
-    // notes <text> -> aggiunge una nota
+    // notes add -> aggiunge una nota
     // gestisco le note come una coda circolare
     char buffer[MAXNOTE * BUFLEN];
     int i, ret;
@@ -620,9 +628,9 @@ void cmd_notes(int sd, struct Partita *partita) {
 
     if (!add) {
         // concateno le note
-        //char note[MAXNOTE+1][BUFLEN]; //coda circolare da primanota a ultimanota
-        //int primanota;
-        //int ultimanota;
+            //char note[MAXNOTE+1][BUFLEN]; //coda circolare da primanota a ultimanota
+            //int primanota;
+            //int ultimanota;
         strcpy(buffer, "");
         for (i = partita->primanota; i != partita->ultimanota; i = (i + 1) % (MAXNOTE + 1)) {
             strcat(buffer, partita->note[i]);
@@ -633,13 +641,13 @@ void cmd_notes(int sd, struct Partita *partita) {
 
         // invio la lunghezza della lista (senza \0)
         len = strlen(buffer);
-        len = htons(len);
+        len = htons(len); // converto in network byte order
         ret = send(sd, &len, sizeof(len), 0);
         if (ret == -1) {
             perror("notes -> Errore nell'invio della lunghezza della lista");
             return;
         }
-        len = ntohs(len);
+        len = ntohs(len); // converto in host byte order
 
         if (len != 0) {
             // invio la lista

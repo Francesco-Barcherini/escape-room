@@ -14,13 +14,13 @@
     #include <stdbool.h>
     #include <time.h>
 
-    #define BUFLEN 256
-    #define WORDLEN 20
-    #define CMDLEN 6
-    #define MAXOBJS 10
-    #define MAXLOCS 5
-    #define MAXNOTE 3
-    #define MAXINVENTARIO 4
-    #define NSTANZE 2
-    #define MAXCLIENT 5
+    #define BUFLEN 256 // lunghezza buffer generico
+    #define WORDLEN 20 // lunghezza risposte brevi
+    #define CMDLEN 6 // lunghezza comandi
+    #define MAXOBJS 10  // massimo oggetti in una stanza
+    #define MAXLOCS 5   // massimo locazioni in una stanza
+    #define MAXNOTE 3   // massimo note in una stanza
+    #define MAXINVENTARIO 4 // massimo oggetti collezionabili nell'inventario
+    #define NSTANZE 2  // numero di stanze presenti nell'Escape Room
+    #define MAXCLIENT 5 // massimo numero di client nella listen
 #endif

@@ -4,26 +4,30 @@
 #include "cmd_server.h"
 
 int main(int argc, char *argv[]){
+    // gestione socket
     int listener, newsd, ret;
 
+    // buffer per i dati, comando per i comandi
     char buffer[BUFLEN], comando[CMDLEN];
 
+    // indirizzi
     struct sockaddr_in servaddr, cliaddr;
     socklen_t addrlen = sizeof(cliaddr);
     uint16_t port, cmdport;
 
+    // set dei file descriptor
     fd_set master, readfds;
     int i, j, fdmax;
 
-    struct Partita stanze[NSTANZE]; 
-    struct Account *accounts = NULL;
-    struct Account *socketToAccount[MAXCLIENT+4]; // +4 per stdin, stdout, stderr e listener
+    struct Partita stanze[NSTANZE]; // array di stanze, contiene le info sulle stanze
+    struct Account *accounts = NULL; // lista degli account
+    struct Account *socketToAccount[MAXCLIENT+4]; // associa l'account al socket di comunicazione, +4 per stdin, stdout, stderr e listener
 
-    bool running = false, stopped = false;
+    bool running = false, stopped = false; // flag per il server
 
-    enum EsitoPartita esito;
+    enum EsitoPartita esito; // esito della partita, controllato prima e dopo ogni comando
 
-    int room;
+    int room; // room in cui sta giocando l'account
 
     // non controllo ./server <porta> perché dipende dalla start
 
@@ -82,7 +86,7 @@ int main(int argc, char *argv[]){
                             port = cmdport;
                             listener = crea_socket_server(&servaddr, htons(port));
 
-                            // aggiungo il socket al set
+                            // aggiungo il socket al set e aggiorno fdmax
                             FD_SET(listener, &master);
                             if(listener > fdmax)
                                 fdmax = listener;
@@ -118,7 +122,7 @@ int main(int argc, char *argv[]){
                                 continue;
 
                             // posso chiudere il server
-                            // chiudo tutte le connessioni
+                            // chiudo tutti i socket
                             for(j = 3; j <= fdmax; j++){
                                 if(FD_ISSET(j, &master)) {
                                     // chiudo j
@@ -157,7 +161,7 @@ int main(int argc, char *argv[]){
                         }
                         printf("Nuova connessione accettata sulla porta %hu: creato socket %d\n", port, newsd);
 
-                        // aggiungo il socket al set
+                        // aggiungo il socket al set e aggiorno fdmax
                         FD_SET(newsd, &master);
                         if(newsd > fdmax)
                             fdmax = newsd;
@@ -186,20 +190,20 @@ int main(int argc, char *argv[]){
                         if (!strcmp(comando, "sign")) // sign <username> <password>
                             cmd_sign(i, &accounts);
                         else if (!strcmp(comando, "login"))  // login <username> <password>
-                            socketToAccount[i] = cmd_login(i, accounts);
+                            socketToAccount[i] = cmd_login(i, accounts); // assegno l'account al socket
                         else if (!strcmp(comando, "start")) { // start <room>
                             if (cmd_start(i, socketToAccount[i], stanze)) // room assegnata -> invio le info sulla room
-                                fine_comando(i, socketToAccount[i]->room, socketToAccount[i], accounts, stanze);
+                                fine_comando(i, socketToAccount[i]->room, socketToAccount[i], accounts, stanze); // controllo l'esito del comando e invio le informazioni al client
                         }
                         else if (!strcmp(comando, "look")) { // look <locazione/oggetto>
-                            esito = invia_stato(i, socketToAccount[i], accounts, stanze);
+                            esito = invia_stato(i, socketToAccount[i], accounts, stanze); // Controllo che la partita sia ancora in corso e che il tempo non sia scaduto
                             if (esito != incorso)
                                 continue;
                             cmd_look(i, stanze[socketToAccount[i]->room]);
-                            fine_comando(i, socketToAccount[i]->room, socketToAccount[i], accounts, stanze);
+                            fine_comando(i, socketToAccount[i]->room, socketToAccount[i], accounts, stanze); // controllo l'esito del comando e invio le informazioni al client
                         }
                         else if (!strcmp(comando, "take")) { // take <object>
-                            esito = invia_stato(i, socketToAccount[i], accounts, stanze);
+                            esito = invia_stato(i, socketToAccount[i], accounts, stanze); // Controllo che la partita sia ancora in corso e che il tempo non sia scaduto
                             if (esito != incorso)
                                 continue;
                             room = socketToAccount[i]->room;
@@ -211,14 +215,14 @@ int main(int argc, char *argv[]){
                                 logout_account(socketToAccount[i], stanze);
                                 socketToAccount[i] = NULL;
                             }
-                            fine_comando(i, room, socketToAccount[i], accounts, stanze);
+                            fine_comando(i, room, socketToAccount[i], accounts, stanze); // controllo l'esito del comando e invio le informazioni al client
                         }
                         else if (!strcmp(comando, "use")) { // use <object1> <object2>
-                            esito = invia_stato(i, socketToAccount[i], accounts, stanze);
+                            esito = invia_stato(i, socketToAccount[i], accounts, stanze); // Controllo che la partita sia ancora in corso e che il tempo non sia scaduto
                             if (esito != incorso)
                                 continue;
                             room = socketToAccount[i]->room;
-                            if (cmd_use(i, &stanze[room], accounts)) { //chiusura socket
+                            if (cmd_use(i, &stanze[room], accounts)) { // client disconnesso
                                 // chiudo il socket
                                 close(i);
                                 FD_CLR(i, &master);
@@ -226,21 +230,21 @@ int main(int argc, char *argv[]){
                                 logout_account(socketToAccount[i], stanze);
                                 socketToAccount[i] = NULL;
                             }
-                            fine_comando(i, room, socketToAccount[i], accounts, stanze);
+                            fine_comando(i, room, socketToAccount[i], accounts, stanze); // controllo l'esito del comando e invio le informazioni al client
                         }
                         else if (!strcmp(comando, "objs")) { // objs
-                            esito = invia_stato(i, socketToAccount[i], accounts, stanze);
+                            esito = invia_stato(i, socketToAccount[i], accounts, stanze); // Controllo che la partita sia ancora in corso e che il tempo non sia scaduto
                             if (esito != incorso)
                                 continue;
                             cmd_objs(i, stanze[socketToAccount[i]->room]);
-                            fine_comando(i, socketToAccount[i]->room, socketToAccount[i], accounts, stanze);
+                            fine_comando(i, socketToAccount[i]->room, socketToAccount[i], accounts, stanze); // controllo l'esito del comando e invio le informazioni al client
                         }
                         else if (!strcmp(comando, "notes")) { // note
-                            esito = invia_stato(i, socketToAccount[i], accounts, stanze);
+                            esito = invia_stato(i, socketToAccount[i], accounts, stanze); // Controllo che la partita sia ancora in corso e che il tempo non sia scaduto
                             if (esito != incorso)
                                 continue;
                             cmd_notes(i, &stanze[socketToAccount[i]->room]);
-                            fine_comando(i, socketToAccount[i]->room, socketToAccount[i], accounts, stanze);
+                            fine_comando(i, socketToAccount[i]->room, socketToAccount[i], accounts, stanze); // controllo l'esito del comando e invio le informazioni al client
                         }
                         else if (!strcmp(comando, "end")) { // end
                             logout_account(socketToAccount[i], stanze);
@@ -257,9 +261,7 @@ int main(int argc, char *argv[]){
             if(stopped)
                 break;            
         }
-        
     }
-    
 }
 
 

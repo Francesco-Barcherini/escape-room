@@ -9,6 +9,6 @@
     bool cmd_take(int sd, char *arg);
     bool cmd_use(int sd, int argc, char *arg1, char *arg2);
     bool cmd_objs(int sd);
-    bool cmd_notes(int sd, bool add);
+    bool cmd_notes(int sd, bool add); // funzionalità a piacere
 
 #endif

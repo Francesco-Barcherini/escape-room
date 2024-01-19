@@ -2,15 +2,15 @@
 #define STRUTTURE_H
 
 #include "include.h"
-enum EsitoPartita {pre, incorso, vittoria, timer, risposta};
+enum EsitoPartita {pre, incorso, vittoria, timer, risposta}; //pre = partita non iniziata, incorso = partita in corso, vittoria = partita vinta, timer = tempo scaduto, risposta = partita terminata per risposta a tentativi sbagliata
 
 struct Account {
     char username[WORDLEN];
     char password[WORDLEN];
     bool logged;
     int room; //-1 se non è in nessuna stanza
-    enum EsitoPartita esito;
-    struct Account *next;
+    enum EsitoPartita esito; // stato della stanza in cui sta giocando, controllato prima e dopo ogni comando
+    struct Account *next; //puntatore al prossimo account nella lista
 };
 
 struct Locazione {
@@ -23,35 +23,35 @@ struct Enigma {
     char risposta[WORDLEN]; 
 };
 
-enum TipoEnigma {aperta, multipla, use};
+enum TipoEnigma {aperta, multipla, use}; //aperta = enigma a risposta aperta, multipla = enigma a risposta multipla, use = l'oggetto si sblocca con una use
 
 struct Oggetto {
     char nome[WORDLEN];
     char desc[BUFLEN];
-    char descBloccato[BUFLEN]; 
+    char descBloccato[BUFLEN]; //descrizione quando l'oggetto è bloccato
     bool bloccato;
     bool token; //true se fa guadagnare un token quando sbloccato
     int seconds; //secondi che si guadagnano quando sbloccato
-    bool taken; //true se è stato preso
-    enum TipoEnigma tipo;
+    bool taken; //true se è stato preso nell'inventario
+    enum TipoEnigma tipo; //tipo di enigma, serve a capire come gestirlo
     struct Enigma enigma;
 };
 
 struct Partita {
-    int room;
-    int connessi;
-    int totToken;
-    int token;
-    int nOggetti;
+    int room; //numero della stanza
+    int connessi; //numero di giocatori connessi, se zero la stanza viene eliminata
+    int totToken; //token totali da recuperare per vincere
+    int token;  //token guadagnati
+    int nOggetti;   //numero di oggetti nella stanza
     struct Oggetto oggetti[MAXOBJS];
-    int maxPresi;
-    int nPresi;
-    int nLocazioni;
+    int maxPresi;  //numero massimo di oggetti che si possono prendere nell'inventario
+    int nPresi; //numero di oggetti presi nell'inventario
+    int nLocazioni; //numero di locazioni nella stanza
     struct Locazione locazioni[MAXLOCS];
-    char note[MAXNOTE+1][BUFLEN]; //coda circolare
-    int primanota;
-    int ultimanota;
-    time_t fine;
+    char note[MAXNOTE+1][BUFLEN]; //funzionalità a piacere: blocco note di massimo MAXNOTE note, gestite come una coda circolare in modalità FIFO
+    int primanota; // le note vanno da primanota
+    int ultimanota; // a ultimanota esclusa
+    time_t fine; //timestamp di fine della partita
 };
 
 // funzioni per la gestione degli account

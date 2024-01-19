@@ -1,12 +1,12 @@
 #include "cmd_client.h"
 #include "util.h"
 
-bool enigmaRisolto = false;
+bool enigmaRisolto = false; // mi serve per capire se ho risolto l'enigma e quindi posso usare l'oggetto nella use
 
-/* Funzione che gestisce la invia_stato del lato server, restituisce true se la partita è finita*/
+/* Controlla lo stato della partita e il tempo, restituisce true se la partita è finita*/
 bool gestisci_invia_stato(int sd) {
     uint8_t stato;
-    enum EsitoPartita esito;
+    enum EsitoPartita esito; // stato della partita
     int ret;
 
     // ricezione stato  
@@ -21,6 +21,7 @@ bool gestisci_invia_stato(int sd) {
     if (esito == incorso)
         return false;
 
+    // la partita è terminata
     switch (esito)
     {
         case vittoria:
@@ -39,15 +40,14 @@ bool gestisci_invia_stato(int sd) {
     return true;
 }
 
-/* Funzione che riceve e mostra a video le statistiche della partita e l'esito del comando, ritorna true se la partita è finita*/
+/* Riceve e mostra a video le statistiche della partita e l'esito del comando, ritorna true se la partita è finita*/
 bool gestisci_fine_comando(int sd) {
     char buffer[BUFLEN];
-    enum EsitoPartita esito;
+    enum EsitoPartita esito; // stato della partita
     int ret, token, tokenRimanenti;
     time_t seconds;
 
-    // ricezione esito
-    //sprintf(buffer, "%d %d %d %ld", account->esito, partita->token, partita->totToken - partita->token, partita->fine - time(NULL));
+    // ricezione esito e info sulla partita
     ret = recv(sd, buffer, sizeof(buffer), 0);
     if (ret == -1) {
         perror("Errore nella ricezione dell'esito del comando");
@@ -63,6 +63,7 @@ bool gestisci_fine_comando(int sd) {
     if (esito == incorso)
         return false;
 
+    // la partita è terminata
     switch (esito)
     {
         case vittoria:
@@ -102,7 +103,7 @@ bool enigma(int sd) {
         exit(1);
     }
 
-    if (tipo == aperta) {
+    if (tipo == aperta) { // il server si aspetta una risposta lunga WORDLEN
         printf("Enigma:\n%s\n", buffer);
         fgets(risposta, sizeof(risposta), stdin);
         sscanf(risposta, "%19s", buffer);
@@ -139,8 +140,8 @@ bool enigma(int sd) {
         
         return false;
     }
-    else if (tipo == multipla) {     
-        printf("Enigma (attenzione, hai un solo tentativo):\n%s", buffer);   
+    else if (tipo == multipla) { // il server si aspetta una risposta lunga 1  
+        printf("Enigma (attenzione, hai un solo tentativo):\n%s", buffer); // la risposta multipla ha un solo tentativo, altrimenti si perde
         while (true) {
             fgets(risposta, sizeof(risposta), stdin);
             sscanf(risposta, "%19s", buffer);
@@ -152,9 +153,17 @@ bool enigma(int sd) {
         }
         // invio risposta
         ret = send(sd, buffer, 1, 0);
+        if (ret == -1) {
+            perror("Errore nell'invio della risposta");
+            exit(1);
+        }
 
         // ricezione esito
         ret = recv(sd, &esito, sizeof(esito), 0);
+        if (ret == -1) {
+            perror("Errore nella ricezione dell'esito dell'enigma");
+            exit(1);
+        }
 
         if (esito == 0) { // risposta sbagliata
             printf("Enigma non risolto\n\n");
@@ -228,7 +237,7 @@ void signup(int sd) {
         printf("Errore di connessione con il server: riprova\n\n");
 }
 
-/* Funzione che gestisce il login*/
+/* Funzione che gestisce il login, restituisce true se va a buon fine*/
 bool login(int sd) {
     char username[WORDLEN], password[WORDLEN], comando[CMDLEN];
     int ret;
@@ -300,7 +309,7 @@ void accesso(int sd) {
             signup(sd);
         else if (!strcmp(comando, "login")) { //login
             if (login(sd))
-                break;
+                break; // login andato a buon fine, esco dalla procedura di accesso
         }
         else
             printf("Comando non valido, riprova\n\n");
@@ -392,7 +401,7 @@ bool cmd_look(int sd, char *arg) {
         exit(1);
     }
 
-    fine = gestisci_invia_stato(sd);
+    fine = gestisci_invia_stato(sd); // dopo aver inviato il comando ricevo lo stato della partita
     if (fine)
         return true;
 
@@ -415,7 +424,7 @@ bool cmd_look(int sd, char *arg) {
     else
         printf("%s\n", buffer);
 
-    return gestisci_fine_comando(sd);
+    return gestisci_fine_comando(sd); // alla fine del comando controllo lo stato della partita e stampo le statistiche
 }
 
 /* Funzione che gestisce take con argomento, restituisce true se la partita è finita*/
@@ -434,7 +443,7 @@ bool cmd_take(int sd, char *arg) {
         exit(1);
     }
 
-    fine = gestisci_invia_stato(sd);
+    fine = gestisci_invia_stato(sd); // dopo aver inviato il comando ricevo lo stato della partita
     if (fine)
         return true;
 
@@ -501,7 +510,7 @@ bool cmd_use(int sd, int argc, char *arg1, char *arg2) {
         exit(1);
     }
 
-    fine = gestisci_invia_stato(sd);
+    fine = gestisci_invia_stato(sd); // dopo aver inviato il comando ricevo lo stato della partita
     if (fine)
         return true;
 
@@ -552,7 +561,7 @@ bool cmd_use(int sd, int argc, char *arg1, char *arg2) {
 
             if (!enigmaRisolto) { // se non ho risolto l'enigma non posso usare l'oggetto
                 printf("use fallita: oggetto %s non sbloccato\n\n", arg2);
-                return gestisci_fine_comando(sd);
+                return gestisci_fine_comando(sd); // alla fine del comando controllo lo stato della partita e stampo le statistiche
             }
 
             // recupero l'esito della use
@@ -590,7 +599,7 @@ bool cmd_use(int sd, int argc, char *arg1, char *arg2) {
             break;
     }
 
-    return gestisci_fine_comando(sd);
+    return gestisci_fine_comando(sd); // alla fine del comando controllo lo stato della partita e stampo le statistiche
 }
 
 /* Funzione che gestisce il comando objs, restituisce true se la partita è finita*/
@@ -608,7 +617,7 @@ bool cmd_objs(int sd) {
         exit(1);
     }
 
-    fine = gestisci_invia_stato(sd);
+    fine = gestisci_invia_stato(sd); // dopo aver inviato il comando ricevo lo stato della partita
     if (fine)
         return true;
 
@@ -621,9 +630,15 @@ bool cmd_objs(int sd) {
 
     printf("\nInventario:\n%s\n", buffer);
 
-    return gestisci_fine_comando(sd);
+    return gestisci_fine_comando(sd); // alla fine del comando controllo lo stato della partita e stampo le statistiche
 }
 
+/* 
+Funzionalità a piacere: i giocatori in una stanza condividono un blocco note in cui possono annotarsi delle osservazioni visibili dagli altri giocatori
+Nel blocco note ci sono massimo MAXNOTES note, gestite come una coda FIFO
+notes -> stampa le note presenti nel blocco note
+notes add -> aggiunge una nota al blocco note
+*/
 /* Funzione che gestisce il comando notes, restituisce true se la partita è finita */
 bool cmd_notes(int sd, bool add) {
     // add -> leggo la nuova nota, altrimenti stampo le note presenti
@@ -641,7 +656,7 @@ bool cmd_notes(int sd, bool add) {
         exit(1);
     }
 
-    fine = gestisci_invia_stato(sd);
+    fine = gestisci_invia_stato(sd); // dopo aver inviato il comando ricevo lo stato della partita
     if (fine)
         return true;
 
@@ -675,7 +690,7 @@ bool cmd_notes(int sd, bool add) {
             exit(1);
         }
         
-        len = ntohs(len);
+        len = ntohs(len); // converto in formato host
         strcpy(buffer, "");
 
         if (len != 0) {
@@ -692,5 +707,5 @@ bool cmd_notes(int sd, bool add) {
         printf("\nNote:\n%s\n", buffer);
     }
 
-    return gestisci_fine_comando(sd);
+    return gestisci_fine_comando(sd); // alla fine del comando controllo lo stato della partita e stampo le statistiche
 }
