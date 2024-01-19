@@ -323,7 +323,10 @@ enum EsitoPartita invia_stato(int sd, struct Account *account, struct Account *a
     esito = account->esito;
     room = account->room;
 
-    printf("Check stato della partita %d\n", room + 1);
+    if (room == -1) // la partita è finita a causa di un altro giocatore
+        printf("invia_stato: partita conclusa\n\n");
+    else
+        printf("Check stato della partita %d\n", room + 1);
 
     if (esito == incorso) {//check timer prima di eseguire il comando
         partita = &stanze[room];
