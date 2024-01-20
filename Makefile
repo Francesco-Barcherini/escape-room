@@ -29,4 +29,4 @@ strutture.o: strutture.c include.h strutture.h
 
 .PHONY: clean
 clean:
-	rm -f server client *.o
+	rm -f server client other *.o
